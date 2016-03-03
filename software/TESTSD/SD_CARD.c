@@ -140,10 +140,6 @@ int main() {
 	char address[100] = "";
 	char phone[100] = "";
 	char emergency[100] = "";
-//	writeToSD(buffer, "test1.txt");
-//	printf("done write\n");
-//	readFromSD(read, "test1.txt", 256);
-//	printf("done read\n");
 
 	formatAndSaveSD("BOB", "", "(604)-123-4567", "BOB 555-5555");
 	readFromSD(read, FILENAME, 512);
