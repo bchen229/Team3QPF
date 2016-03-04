@@ -24,18 +24,15 @@ void executePWSetupPress(int choice, int *inputBoxPressed, int *buttonPressed,
 			// append '$' to signal end of password
 			sprintf(newPassword, "%s%s", newPassword, "$");
 			keygen(key, newPassword, strlen(newPassword));
-			if (writeToSD(key, KEYFILE) == 0) {
+			if (writeToSD(newPassword, "password.txt") == 0) {
 				greenLEDS = 0xff;
 			} else {
 				redLEDS = 0xff;
 			}
-			writeToSD(newPassword, "password.txt");
-			printkey(key);
 		}
 		if (choice == 1) {
 			if (writeToSD("E", "passMode.txt") == 0) {
 				greenLEDS = 0xff;
-				;
 			}
 		}
 		if (choice == 2) {
@@ -666,7 +663,6 @@ void MainMenu() {
 						//choice 3 = load encrypted
 						if (choice == 3) {
 
-							//readFromSD(key, KEYFILE, 16);
 							char read[512] = "";
 							InputBox *tempSD = globalCurrentPage->inputBoxes;
 							if (readFromSDEncrypted(read, secureFilename, 512)

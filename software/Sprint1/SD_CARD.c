@@ -132,6 +132,8 @@ int writeToSDEncrypted(char* buffer, char* fileName) {
 
 	char *encryptedBuffer = encryptData(buffer);
 
+	printf("\nebuffer %s\n", encryptedBuffer);
+
 	printf("Opening SDCard\n");
 	if ((device_reference = alt_up_sd_card_open_dev(
 			"/dev/Altera_UP_SD_Card_Avalon_Interface_0")) == NULL) {
@@ -148,8 +150,8 @@ int writeToSDEncrypted(char* buffer, char* fileName) {
 			}
 			if (myFileHandle != -1) {
 				printf("File Opened\n");
-				for (i = 0; i < strlen(buffer); i++) {
-					if (alt_up_sd_card_write(myFileHandle, buffer[i])
+				for (i = 0; i < strlen(encryptedBuffer); i++) {
+					if (alt_up_sd_card_write(myFileHandle, encryptedBuffer[i])
 							== false) {
 						printf("Error writing to file...\n");
 						return -1;
@@ -190,15 +192,17 @@ int readFromSDEncrypted(char* buffer, char* fileName, int bufferSize) {
 			for (i = 0; i < bufferSize; i++) {
 				tempChar[0] = alt_up_sd_card_read(myFileHandle);
 				if (tempChar[0] < 0) {
-					return 0;
+					break;
 				}
 				strcat(buffer, tempChar);
 			}
 			//printf("Done!!!\n");
 			alt_up_sd_card_fclose(myFileHandle);
 
+			printf("buffer %s", buffer);
 			char *decryptedData = decryptData(buffer);
-			printf("Decrypted after read: %s", buffer);
+			printf("Decrypted after read: %s", decryptedData);
+			strcpy(buffer, decryptedData);
 			return 0;
 		} else {
 			//printf("File NOT Opened\n");

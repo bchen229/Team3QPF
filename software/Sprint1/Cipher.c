@@ -139,7 +139,7 @@ void printkey(char* key) {
 }
 
 char* encrypt(char* key, char* plaintext, int textlen) {
-	char *ciphertext = (char*) malloc(sizeof(char) * textlen);
+	char *ciphertext = malloc(sizeof(char) * textlen);
 	int i;
 
 	char a, b, a_, b_; // a: MS nibble, b: LS nibble of char
@@ -173,6 +173,7 @@ char* encrypt(char* key, char* plaintext, int textlen) {
 		}
 		ciphertext[i] = ((a_ << 4) | b_) & 0xff;
 	}
+	ciphertext[i] = '\0';
 	return ciphertext;
 }
 
@@ -343,7 +344,7 @@ char* writeCipher(char* cipher, int length) {
 		doublecipher[2 * i] = hex2char((cipher[i] >> 4) & 0xf);
 		doublecipher[2 * i + 1] = hex2char(cipher[i] & 0xf);
 	}
-	doublecipher[length * 2 + 1] = '\0';
+	doublecipher[length * 2 - 1] = '\0';
 	return doublecipher;
 }
 
@@ -360,11 +361,13 @@ char * encryptData(char * buffer) {
 
 	encryptedtextlen = strlen(buffer) + 1;
 
-	char keyInput[16];
-	readFromSD(keyInput, KEYFILE, 16);
+	char pass[] = "1234";
+	char key[16];
+	keygen(key,pass,4);
+	printkey(key);
 
 	char *encryptedData;
-	encryptedData = encrypt(keyInput, buffer, encryptedtextlen);
+	encryptedData = encrypt(key, buffer, encryptedtextlen);
 	char *encdata_w = writeCipher(encryptedData, encryptedtextlen);
 
 	return encdata_w;
@@ -372,11 +375,15 @@ char * encryptData(char * buffer) {
 
 char * decryptData(char * buffer) {
 
-	char keyInput[16];
-	readFromSD(keyInput, KEYFILE, 16);
+	char pass[] = "1234";
+	char key[16];
+	keygen(key,pass,4);
+	printkey(key);
 
 	char *parsedData_w = parseCipher(buffer, (encryptedtextlen) * 2);
-	char* plaintext = decrypt(keyInput, parsedData_w, encryptedtextlen);
+	char* plaintext = decrypt(key, parsedData_w, encryptedtextlen);
+
+	printf("pt %s\n", plaintext);
 
 	return plaintext;
 }
