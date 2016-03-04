@@ -7,6 +7,9 @@
 #include "Cipher.h"
 #include "SD_CARD.h"
 
+/**
+ * No easy way around these lookup table functions... 
+ */
 int char2hex(char c) {
 	switch (c) {
 	case '0':
@@ -46,6 +49,9 @@ int char2hex(char c) {
 	}
 }
 
+/**
+ * No easy way around these lookup table functions... 
+ */
 char hex2char(int h) {
 	switch (h) {
 	case 0:
@@ -85,6 +91,9 @@ char hex2char(int h) {
 	}
 }
 
+/**
+ * Converts key to writable format
+ */
 char* convertKey(char* key, int len) {
 	int i;
 	for (i = 0; i < len; i++) {
@@ -102,6 +111,11 @@ int find(char* buf, int bufsize, char c) {
 	return -1;
 }
 
+/**
+ * Expects a password less than 16 chars long
+ * returns a 4x4 nibble matrix into the referenced key array
+ * The nibbles should not repeat. Assert 16 unique values
+ */
 void keygen(char* key, char* pw, int pwlen) {
 	// assert(strlen(pw)==pwlen);
 	assert(pwlen<16);
@@ -130,6 +144,9 @@ void keygen(char* key, char* pw, int pwlen) {
 	writeToSD(key, KEYFILE);
 }
 
+/**
+ * prints the key in 4x4 format
+ */
 void printkey(char* key) {
 	int i;
 	for (i = 0; i < 16; i++)
@@ -138,6 +155,10 @@ void printkey(char* key) {
 	printf("\n");
 }
 
+/**
+ * encryption without chaining expects 4x4 key
+ * Then substitutes bytes in the plaintext using the key
+ */
 char* encrypt(char* key, char* plaintext, int textlen) {
 	char *ciphertext = malloc(sizeof(char) * textlen);
 	int i;
@@ -148,26 +169,26 @@ char* encrypt(char* key, char* plaintext, int textlen) {
 	int coldiff; // abs(bj-aj) difference of columns
 
 	for (i = 0; i < textlen; i++) {
+		// masks for sanity
 		a = (plaintext[i] >> 4) & 0xf;
 		b = (plaintext[i] & 0xf);
-		ak = find(key, 16, a);
-		bk = find(key, 16, b);
-		ai = ak / 4;
-		bi = bk / 4;
-		aj = ak % 4;
-		bj = bk % 4;
+		// find the nibbles in the key
+		ak = find(key, 16, a);	bk = find(key, 16, b); 
+		ai = ak / 4;	bi = bk / 4;	// determine rows
+		aj = ak % 4;	bj = bk % 4;	// determine columns
 		coldiff = abs(bj - aj);
 
-		if (ai == bi) { //same row
+		// Perform substitutions
+		if (ai == bi) { 		//same row
 			a_ = key[ai * 4 + ((aj + 1 > 3) ? 0 : aj + 1)];
 			b_ = key[bi * 4 + ((bj + 1 > 3) ? 0 : bj + 1)];
-		} else if (aj == bj) { //same column
+		} else if (aj == bj) { 	//same column
 			a_ = key[(((ai + 1) % 4) * 4 + aj)];
 			b_ = key[(((bi + 1) % 4) * 4 + bj)];
-		} else if (aj > bj) { //first char to the right of the second char
+		} else if (aj > bj) { 	//first char to the right of the second char
 			a_ = key[ak - coldiff];
 			b_ = key[bk + coldiff];
-		} else if (bj > aj) { //second char to the right of the first char
+		} else if (bj > aj) { 	//second char to the right of the first char
 			a_ = key[ak + coldiff];
 			b_ = key[bk - coldiff];
 		}
@@ -177,6 +198,11 @@ char* encrypt(char* key, char* plaintext, int textlen) {
 	return ciphertext;
 }
 
+/**
+ * decryption without chaining expects 4x4 key
+ * Then substitutes bytes in the cipher using the key
+ * NOTE: length of cipher should equal length of plaintext
+ */
 char* decrypt(char* key, char* ciphertext, int textlen) {
 	char *plaintext = (char*) malloc(sizeof(char) * textlen);
 	int i;
@@ -186,26 +212,26 @@ char* decrypt(char* key, char* ciphertext, int textlen) {
 	int coldiff; // abs(bj-aj) difference of columns
 
 	for (i = 0; i < textlen; i++) {
-		a = (ciphertext[i] >> 4) & 0xf;
-		b = (ciphertext[i] & 0xf);
-		ak = find(key, 16, a);
-		bk = find(key, 16, b);
-		ai = ak / 4;
-		bi = bk / 4;
-		aj = ak % 4;
-		bj = bk % 4;
+		// masks for sanity
+		a = (plaintext[i] >> 4) & 0xf;
+		b = (plaintext[i] & 0xf);
+		// find the nibbles in the key
+		ak = find(key, 16, a);	bk = find(key, 16, b); 
+		ai = ak / 4;	bi = bk / 4;	// determine rows
+		aj = ak % 4;	bj = bk % 4;	// determine columns
 		coldiff = abs(bj - aj);
 
-		if (ai == bi) { //same row
+		// Perform substitutions
+		if (ai == bi) { 		//same row
 			a_ = key[ai * 4 + ((aj - 1 < 0) ? 3 : aj - 1)];
 			b_ = key[bi * 4 + ((bj - 1 < 0) ? 3 : bj - 1)];
-		} else if (aj == bj) { //same column
+		} else if (aj == bj) { 	//same column
 			a_ = key[(((ai - 1) < 0) ? 3 : ai - 1) * 4 + aj];
 			b_ = key[(((bi - 1) < 0) ? 3 : bi - 1) * 4 + bj];
-		} else if (aj > bj) { //first char to the right of the second char
+		} else if (aj > bj) { 	//first char to the right of the second char
 			a_ = key[ak - coldiff];
 			b_ = key[bk + coldiff];
-		} else if (bj > aj) { //second char to the right of the first char
+		} else if (bj > aj) { 	//second char to the right of the first char
 			a_ = key[ak + coldiff];
 			b_ = key[bk - coldiff];
 		}
@@ -214,42 +240,59 @@ char* decrypt(char* key, char* ciphertext, int textlen) {
 	return plaintext;
 }
 
+/**
+ * Adds additional characters to the end of the plaintext to meet the nearest
+ * blocksize can specify padding character
+ */
 char* pad(char* text, int length, int blocksize, char padchar) {
 	int i;
-
+	// Escape early if no padding is necessary
 	if (length % blocksize == 0) {
 		char* padded = (char*) malloc(sizeof(char) * length);
 		strcpy(padded, text);
 		return padded;
 	}
+	// compute difference to nearest multiple
 	int padding = blocksize - length % blocksize;
+	// initialize
 	char* padded = (char*) malloc(sizeof(char) * (length + padding));
 	strcpy(padded, text);
+	// add pad chars into new copied array
+	for (i = length; i < length + padding; i++) padded[i] = padchar;
 
-	for (i = length; i < length + padding; i++)
-		padded[i] = padchar;
 	return padded;
 }
 
+/**
+ * Divides the plaintext into blocks of size blocksize for use in
+ * chaining encryption
+ */
 char** blocky(char *text, int length, int blocksize, char padchar) {
 	int i, j;
+	// compute number of blocks
 	int numblocks = ceil(((double) length) / ((double) blocksize));
+	// get padded string
 	char* padded = pad(text, length, blocksize, padchar);
+	// initialize list of blocks
 	char** blocks = (char**) malloc(sizeof(char*) * numblocks);
 	for (i = 0; i < numblocks; i++) {
 		blocks[i] = (char*) malloc(sizeof(char) * blocksize);
-		for (j = 0; j < blocksize; j++)
+		for (j = 0; j < blocksize; j++)		// perform 1D to 2D arith to extract blocks
 			blocks[i][j] = padded[i * blocksize + j] & 0xff;
 	}
 
 	return blocks;
 }
 
+/**
+ * Converts 4 char arrays to integers for ease of printing or XORing
+ */
 int func_4char2int(char* block, int blocksize) {
 	assert(blocksize%2==0);
 	assert(blocksize<=4);
 
 	int i, val = 0;
+	// enter value byte-by-byte
 	for (i = 0; i < sizeof(int); i++) {
 		val <<= 8;
 		val |= block[i] & 0xff;
@@ -257,9 +300,13 @@ int func_4char2int(char* block, int blocksize) {
 	return val;
 }
 
+/**
+ * Converts integers to 4 char arrays to store back
+ */
 char* func_int_2_4char(int val) {
 	int i;
 	char* block = (char*) malloc(sizeof(char) * sizeof(int));
+	// receive value byte-by-byte
 	for (i = sizeof(int) - 1; i >= 0; i--) {
 		block[i] = val & 0xff;
 		val >>= 8;
@@ -267,10 +314,19 @@ char* func_int_2_4char(int val) {
 	return block;
 }
 
+/**
+ * Quick function to evaluate the XOR of two chars
+ */
 char* xor4char(char* t1, char* t2) {
+	// uses requisite functions to convert to int first and then convert back
 	return func_int_2_4char(func_4char2int(t1, 4) ^ func_4char2int(t2, 4));
 }
 
+/**
+ * Encrypt using chaining mode Uses 4x4 key plaintext of length x char
+ * blocksize: restricted to 4 for NIOS Resulting cipher is length + 4
+ * to accommodate initialization vector
+ */
 char* encryptCBC(char* key, char* plaintext, int length, int blocksize) {
 	int i;
 	int numblocks = ceil(((double) length) / ((double) blocksize));
@@ -304,6 +360,13 @@ char* encryptCBC(char* key, char* plaintext, int length, int blocksize) {
 	return cipher;
 }
 
+/**
+ * Decrypt a chaining mode cipher uses 4x4 key
+ * ciphertext -- IV should be the first 4 bytes of the array
+ * length argument is the plaintext length -- that's: ciphertext.length - 4
+ * blocksize = 4
+ * Outputs a printable char array (may contain padding characters)
+ */
 char* decryptCBC(char* key, char* ciphertext, int plaintxt_len, int blocksize) {
 	int i;
 	int numblocks = ceil(((double) plaintxt_len) / ((double) blocksize));
@@ -326,6 +389,11 @@ char* decryptCBC(char* key, char* ciphertext, int plaintxt_len, int blocksize) {
 	return plaintext;
 }
 
+/**
+ * Prints byte stream in terminal viewable format
+ * ie. converts each byte to two hex digits
+ * eg. [0xef] --> [0xe][0xf]
+ */
 void printCipher(char* cipher, int length) {
 	int i;
 
@@ -335,12 +403,19 @@ void printCipher(char* cipher, int length) {
 				printf("%x", cipher[i] & 0xff);
 }
 
+/**
+ * Outputs byte stream in saveable format -- to be later parsed
+ * ie. converts each byte to two hex digits
+ * eg. [0xef] --> [0xe][0xf]
+ * output length should be twice the cipher length
+ */
 char* writeCipher(char* cipher, int length) {
 	int i;
 
 	char* doublecipher = malloc(sizeof(char) * length * 2);
 	for (i = 0; i < length * 2; i++) { // add zeros to single digit chars
 		printf("[%x]", cipher[i] & 0xff);
+		// split each byte into two hex chars 
 		doublecipher[2 * i] = hex2char((cipher[i] >> 4) & 0xf);
 		doublecipher[2 * i + 1] = hex2char(cipher[i] & 0xf);
 	}
@@ -348,19 +423,31 @@ char* writeCipher(char* cipher, int length) {
 	return doublecipher;
 }
 
+/**
+ * Converts byte stream back to original hex values (max 0xff ie in [0,255])
+ * for decryption. Decrypter will not understand cipher if this is not used!
+ * ie. converts each byte to two hex digits
+ * eg. [0xef] --> [0xe][0xf]
+ * cipher length should be half the input length
+ */
 char* parseCipher(char* input, int inputlength) {
 	assert(inputlength%2==0);
 	int i;
 	char *cipher = malloc(sizeof(char) * (inputlength / 2));
+	// concatenate every 2 bytes to 1 hex/char value
 	for (i = 0; i < inputlength; i += 2)
 		cipher[i / 2] = (char2hex(input[i]) << 4) | char2hex(input[i + 1]);
 	return cipher;
 }
 
+/*
+ *	Wrapper function
+ */
 char * encryptData(char * buffer) {
 
 	encryptedtextlen = strlen(buffer) + 1;
 
+	// Couldn't get the software key to work
 	char pass[] = "1234";
 	char key[16];
 	keygen(key,pass,4);
@@ -373,8 +460,11 @@ char * encryptData(char * buffer) {
 	return encdata_w;
 }
 
+/*
+ *	Wrapper function
+ */
 char * decryptData(char * buffer) {
-
+	// Couldn't get the software key to work
 	char pass[] = "1234";
 	char key[16];
 	keygen(key,pass,4);

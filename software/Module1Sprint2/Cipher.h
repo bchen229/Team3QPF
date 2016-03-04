@@ -1,3 +1,7 @@
+
+/**
+ * No easy way around these lookup table functions... 
+ */
 int char2hex(char c);
 char hex2char(int h);
 
@@ -10,7 +14,7 @@ int find(char* buf, int bufsize, char c);
 
 /**
  * Expects a password less than 16 chars long
- * returns a 4x4 nibble matrix
+ * returns a 4x4 nibble matrix into the referenced key array
  * The nibbles should not repeat. Assert 16 unique values
  */
 void keygen(char* key, char* pw, int pwlen);
@@ -100,5 +104,9 @@ char* writeCipher(char* cipher, int length);
  */
 char* parseCipher(char* input, int inputlength);
 
+
+/*
+ *	Wrapper functions
+ */
 char * encryptData(char * buffer);
 char * decryptData(char * buffer);
