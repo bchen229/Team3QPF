@@ -44,7 +44,8 @@ int getcharTouch(void);
 /*
  *
  * Name: updateTime
- * Description: This function checks the data from the gps and print out the time
+ * Description: This function checks the data from the gps and print out the time.
+ * Used in the interrupt routine
  * Parameters: void
  *
  */
@@ -54,6 +55,7 @@ void updateTime();
  *
  * Name: updateCoord
  * Description: This function checks the data from the gps and print out the coordinates recieved from the GPS
+ * Used in the interrupt routine
  * Parameters: void
  *
  */
@@ -63,6 +65,7 @@ void updateCoord();
  *
  * Name: updateCoordNoPrint
  * Description: This function checks the data from the gps. Used to get the distance for geofencing
+ * Used in the interrupt routine
  * Parameters: void
  *
  */
