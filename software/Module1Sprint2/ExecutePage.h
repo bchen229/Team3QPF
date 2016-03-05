@@ -1,14 +1,33 @@
+/**
+* Handles and executes a press on the password setup page.
+* Parameters: choice, intputBoxPressed flag, buttonPressed flag, sdBoxPressed flag
+*/
 void executePWSetupPress(int choice, int *inputBoxPressed, int *buttonPressed,
 		int * sdBoxPressed);
-
+/**
+* Handles and executes a press on the password login page.
+* Parameters: choice, intputBoxPressed flag, buttonPressed flag, sdBoxPressed flag
+*/
 void executePWLogin(int choice, int *inputBoxPressed, int *buttonPressed,
 		int * sdBoxPressed);
 
+/**
+* Handles and executes a press on the GeoFencing Logging Page.
+* Parameters: choice, intputBoxPressed flag, buttonPressed flag, sdBoxPressed flag
+*/
 void executeLoggingSettings(int choice, int *inputBoxPressed,
 		int *buttonPressed, int * sdBoxPressed);
 
+/**
+* Handles and executes a press on the map page.
+* Parameters: The button that was pressed, the choice of button
+*/
 void executeMapPress(Button theButton, int choice);
 
+/**
+* Handles and executes a press on the keyboard.
+* Parameters: They Key choice
+*/
 void executeKeyPress(int choice);
 
 /**
