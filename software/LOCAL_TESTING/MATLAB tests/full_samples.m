@@ -1,5 +1,5 @@
 % coords.m
-close all;
+% close all;
 clear all;
 
 mcleod = [

@@ -1,4 +1,8 @@
 % coords1.m
+% close all;
+clear all;
+
+
 extents = [
 -123.250812, 49.262161;		% (0,0)
 -123.248334, 49.263114;		% (800,0)
@@ -11,7 +15,7 @@ screen = [
 800, -  480;
 0,	 -  480];
 
-close all;
+
 
 figure(1); % GPS Coordinates
 hold on;
@@ -20,7 +24,7 @@ triplot(TRI);
 
 % compute centroids and plot as black points
 ct = tri_centroid(extents,TRI);
-plot(ct2(:,2),ct2(:,1),'k*')
+plot(ct(:,1),ct(:,2),'k*')
 
 TRI2 = delaunay(extents(:,1),extents(:,2))
 
