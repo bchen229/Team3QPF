@@ -1,5 +1,5 @@
 % coords.m
-% close all;
+close all;
 clear all;
 
 mcleod = [
@@ -73,7 +73,7 @@ test_ = [ -123.249718, 49.261797 ];
 
 
 
-figure(7); % GPS Coordinate Space
+figure(7); % GPS Coordinate Space Simple Test
 
 hold on;
 ct2 = tri_centroid(extents,TRI);
@@ -82,7 +82,7 @@ triplot(TRI);
 
 
 
-figure(8); % Screen Space
+a = figure(8); % GPS Coordinate Space Full Mesh
 hold on;
 TRI_ALL = delaunayTriangulation(all_points);
 ct = tri_centroid(all_points,T);
@@ -99,7 +99,7 @@ ylabel('Latitude')
 
 
 
-figure(9);
+b = figure(9); % Screen Space
 hold on;
 TRI_XY = delaunayTriangulation(BC);
 triplot(TRI_XY);
@@ -110,7 +110,13 @@ ylabel('y')
 
 
 
+set(a, 'PaperPosition', [0 0 5 5]); 
+set(a, 'PaperSize', [5 5]);
+saveas(a,'GPS_full','pdf')
 
+set(b, 'PaperPosition', [0 0 8 4.5]); 
+set(b, 'PaperSize', [8 4.5]);
+saveas(b,'screen_full','pdf')
 
 
 

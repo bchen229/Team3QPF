@@ -1,5 +1,5 @@
 % coords1.m
-% close all;
+close all;
 clear all;
 
 
@@ -17,7 +17,7 @@ screen = [
 
 
 
-figure(1); % GPS Coordinates
+a = figure(1); % GPS Coordinates
 hold on;
 TRI = delaunayTriangulation(extents);
 triplot(TRI);
@@ -32,7 +32,7 @@ test_ = [-123.249718, 49.261797];
 plot(-123.249718, 49.261797,'g*')
 
 [cdist,nn] = nearestneighbour(test_,ct);
-% distinguish nearest centroid
+% distinguish nearest centroid; paint blue
 plot(ct(nn,1),ct(nn,2),'b*')
 
 % compute barycentric components
@@ -48,9 +48,11 @@ bary_point = [dot(B,screen(TN,1)) dot(B,screen(TN,2))]
 % TEST RANDOM POINT
 test_eps = test_ + 1e-4*randn(1,2)
 plot(test_eps(:,1),test_eps(:,2),'c*')
+title('GPS Coordinate Space')
+xlabel('Longitude')
+ylabel('Latitude')
 
-
-figure(2); % Screen Space
+b = figure(2); % Screen Space
 hold on;
 plot(screen(:,1),screen(:,2),'r');
 plot(bary_point(1),bary_point(2),'g*')
@@ -63,9 +65,15 @@ B = cartesianToBarycentric(TRI,nn,test_eps)
 bary_point_eps = [dot(B,screen(TN,1)) dot(B,screen(TN,2))]
 
 plot(bary_point_eps(:,1),bary_point_eps(:,2),'c*')
+title('Screen Space')
+xlabel('x')
+ylabel('y')
 
+set(a, 'PaperPosition', [0 0 5 5]); 
+set(a, 'PaperSize', [5 5]);
+saveas(a,'GPS_simple','pdf')
 
-
-
-
+set(b, 'PaperPosition', [0 0 8 4.5]); 
+set(b, 'PaperSize', [8 4.5]);
+saveas(b,'screen_simple','pdf')
 
