@@ -82,7 +82,7 @@ void drawKeyboard(Page * currentScreen) {
 	Key * k = currentScreen->keyboard.currentKeyset;
 
 	n = sizeof(k) / sizeof(k[0]);
-
+	//check the flag to see if the keyboard is numberic
 	if (currentScreen->keyboard.isNum == 1) {
 
 		for (i = 0; i < NUM_SIZE; i++) {
